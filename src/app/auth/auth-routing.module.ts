@@ -8,7 +8,6 @@ const routes: Routes = [
 
   {
     path:'',
-    
     component: AuthLayoutComponent,
     children:[
       { path: 'login' , component: LoginPageComponent },
