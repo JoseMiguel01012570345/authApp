@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environments } from '../../environments/environments';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, of, switchMap } from 'rxjs';
 import { User } from '../interfaces/user.interfaces';
 import { AuthStatus } from '../interfaces/auth-status.enum';
 import { LoginResponse } from '../interfaces/login-response.interfaces';
@@ -53,12 +53,7 @@ export class AuthService {
                 }
             })
         )
-    ),
-    catchError(err => {
-        console.error('Registration error:', err);
-        return of(false); // Return false on error
-    })
-    ) 
+    ),) 
   }
 
   logout(){
@@ -69,7 +64,6 @@ export class AuthService {
 
   login( email:string , password:string ):Observable<boolean>{
     
-    console.log('login...')
     const url = `${this.baseUrl}/auth/login`
 
     const body = { email , password }
@@ -86,7 +80,7 @@ export class AuthService {
   }
   
   checkAuthStatus():Observable<boolean>{
-    console.log('checking...')
+  
     const url = `${this.baseUrl}/auth/check-token`
     const token = localStorage.getItem('token')
     if(!token)return of(false)
