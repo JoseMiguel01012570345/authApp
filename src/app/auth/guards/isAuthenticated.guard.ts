@@ -6,13 +6,11 @@ import { AuthStatus } from '../interfaces/auth-status.enum';
 export const isAuthenticatedGuard: CanActivateFn = (route, state) => {
   
   const authService = inject(AuthService)
+  const router = inject(Router)
 
   if( authService.AuthStatus() === AuthStatus.authtenticated ){
     return true;
   }
 
-  const router = inject(Router)
-
-  router.navigateByUrl('/auth/login')
   return false
 };

@@ -1,11 +1,12 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environments } from '../../environments/environments';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { User } from '../interfaces/user.interfaces';
 import { AuthStatus } from '../interfaces/auth-status.enum';
 import { LoginResponse } from '../interfaces/login-response.interfaces';
 import { CheckTokenResponse } from '../interfaces/check-token-status.interfaces';
+import { RegisterResponse } from '../interfaces/register-response.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -18,23 +19,57 @@ export class AuthService {
   private _currentUser = signal<User | null>(null)
   private _authStatus = signal<AuthStatus>(AuthStatus.checking)
 
-  constructor() { }
+  constructor() { 
+    this.checkAuthStatus().subscribe( (s)=>console.log(s))
+    
+  }
 
 
   public currentUser = computed( ()=> this._currentUser() )
-  public AuthStatus = computed( ()=> this._authStatus() )
+  public AuthStatus = computed<AuthStatus>( ()=> this._authStatus() )
 
   private setAuthentication( user:User , token:string ):boolean{
+    
     this._currentUser.set(user)
     this._authStatus.set(AuthStatus.authtenticated)
     localStorage.setItem('token',token)
 
-    return true
+    return true 
 
+  }
+
+  register( username:string , email:string , password:string ):Observable<boolean>{
+    
+    const body = { name:username , email , password }
+    return this.http.post<RegisterResponse>(`${this.baseUrl}/auth/register` , body).pipe(
+      
+      switchMap(() => 
+        this.login(email, password).pipe(
+            map(success => {
+                if (success)  return true;
+                 else {
+                    console.log('Login failed'); // Handle login failure
+                    return false;
+                }
+            })
+        )
+    ),
+    catchError(err => {
+        console.error('Registration error:', err);
+        return of(false); // Return false on error
+    })
+    ) 
+  }
+
+  logout(){
+    this._currentUser.set(null)
+    this._authStatus.set( AuthStatus.noAuthtenticated )
+    localStorage.removeItem('token')
   }
 
   login( email:string , password:string ):Observable<boolean>{
     
+    console.log('login...')
     const url = `${this.baseUrl}/auth/login`
 
     const body = { email , password }
@@ -51,10 +86,10 @@ export class AuthService {
   }
   
   checkAuthStatus():Observable<boolean>{
-
-    const url = `${this.baseUrl}/auth/check`
+    console.log('checking...')
+    const url = `${this.baseUrl}/auth/check-token`
     const token = localStorage.getItem('token')
-    if(!token)return of(true)
+    if(!token)return of(false)
    
     const headers = new HttpHeaders()
     .set('Authorization' , `Bearer ${token}` )
