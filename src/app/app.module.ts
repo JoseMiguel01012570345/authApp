@@ -4,10 +4,12 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { DashBoardLayoutComponent } from './dashboard/dashboard-layouts/layout/dashboard-layout.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent , 
+    DashBoardLayoutComponent ,
   ],
   imports: [
     BrowserModule,

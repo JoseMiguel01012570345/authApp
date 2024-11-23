@@ -1,7 +1,16 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'layout',
   templateUrl: './dashboard-layout.component.html',
 })
-export class DashBoardLayoutComponent { }
+export class DashBoardLayoutComponent { 
+
+
+  private authService = inject( AuthService )
+  public user = computed( () => this.authService.currentUser() )
+
+  
+}
+
